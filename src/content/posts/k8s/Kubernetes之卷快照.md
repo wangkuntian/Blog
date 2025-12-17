@@ -19,20 +19,21 @@ lang: ''
 2. **CSI 驱动支持快照**：
    - 确认驱动是否支持快照：`kubectl get csidrivers <驱动名称> -o yaml`，查看 `volumeSnapshotClasses` 字段为 `true` 则支持；
 
-     ```bash
-     # 示例：检查 NFS CSI 驱动（需 v4.0+ 支持快照）
-     kubectl get csidrivers nfs.csi.k8s.io -o yaml
-     # 示例：检查 Ceph RBD CSI 驱动
-     kubectl get csidrivers rbd.csi.ceph.com -o yaml
-     ```
+```bash
+# 示例：检查 NFS CSI 驱动（需 v4.0+ 支持快照）
+kubectl get csidrivers nfs.csi.k8s.io -o yaml
+# 示例：检查 Ceph RBD CSI 驱动
+kubectl get csidrivers rbd.csi.ceph.com -o yaml
+```
 
-   - 常见支持快照的 CSI 驱动：Ceph RBD、AWS EBS、Azure Disk、NFS CSI（v4.0+）。
+> 常见支持快照的 CSI 驱动：Ceph RBD、AWS EBS、Azure Disk、NFS CSI（v4.0+）。
+
 3. **Snapshot Controller 已部署**：
    K8s 1.20+ 集群默认部署（在 `kube-system` 命名空间），验证：
 
-   ```bash
-   kubectl get pods -n kube-system | grep snapshot-controller
-   ```
+```bash
+kubectl get pods -n kube-system | grep snapshot-controller
+```
 
 ---
 
@@ -46,7 +47,7 @@ lang: ''
 
 NFS CSI 快照通过复制 NFS 目录实现，需指定驱动和快照参数：
 
-```yaml
+```yaml title="nfs-snapshotclass.yaml"
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
@@ -62,7 +63,7 @@ parameters:
 
 块存储快照需指定 Ceph 集群认证等参数：
 
-```yaml
+```yaml title="rbd-snapshotclass.yaml"
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
@@ -86,7 +87,7 @@ kubectl apply -f rbd-snapshotclass.yaml
 # 验证快照类
 kubectl get volumesnapshotclasses.snapshot.storage.k8s.io
 # 简写
-kubectl get vsc
+kubectl get vsclass
 ```
 
 ## 步骤 2：创建 VolumeSnapshot（具体快照）
@@ -95,7 +96,7 @@ kubectl get vsc
 
 ### NFS CSI 快照（nfs-snapshot.yaml）
 
-```yaml
+```yaml title="nfs-snapshot.yaml"
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
 metadata:
@@ -128,24 +129,24 @@ nfs-pvc-snapshot    true         csi-nfs-dynamic-pvc     <none>                 
 
 1. 查看快照底层资源（SnapshotContent）：
 
-   ```bash
-   kubectl get volumesnapshotcontents.snapshot.storage.k8s.io
-   # 简写：kubectl get vsc
-   ```
+```bash
+kubectl get volumesnapshotcontents.snapshot.storage.k8s.io
+# 简写
+kubectl get vsc
+```
 
-2. 验证后端存储的快照（以 NFS 为例）：
-   NFS CSI 快照会在 NFS 服务端创建快照目录（默认在共享目录下的 `.snapshot` 子目录），登录 NFS 服务端查看：
+2. 验证后端存储的快照（以 NFS 为例）：NFS CSI 快照会在 NFS 服务端创建快照目录（默认在共享目录下的 `snapshot-` 开头的子目录），登录 NFS 服务端查看：
 
-   ```bash
-   # NFS 服务端执行
-   ls -l /data/nfs-root/<PVC 对应的子目录>/.snapshot/
-   ```
+```bash
+# NFS 服务端执行
+ls -l /data/nfs-root/<PVC 对应的子目录>/snapshot-<snapshot-id>/
+```
 
-   Ceph RBD 快照可通过 `rbd snap ls` 验证：
+Ceph RBD 快照可通过 `rbd snap ls` 验证：
 
-   ```bash
-   rbd snap ls rbd/<镜像名>
-   ```
+```bash
+rbd snap ls rbd/<镜像名>
+```
 
 ---
 
@@ -155,7 +156,7 @@ nfs-pvc-snapshot    true         csi-nfs-dynamic-pvc     <none>                 
 
 ## 从 NFS 快照恢复 PVC（nfs-restore-pvc.yaml）
 
-```yaml
+```yaml title="nfs-restore-pvc.yaml"
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -173,7 +174,7 @@ spec:
     apiGroup: snapshot.storage.k8s.io
 ```
 
-## 创建恢复的 PVC 并验证：
+## 创建恢复的 PVC 并验证
 
 ```bash
 kubectl apply -f nfs-restore-pvc.yaml

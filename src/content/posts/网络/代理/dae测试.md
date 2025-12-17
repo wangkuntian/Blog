@@ -17,7 +17,7 @@ linux kernel > 5.17
 
 ---
 
-# 2. 安装dae
+## 2. 安装dae
 
 安装脚本
 
@@ -40,7 +40,7 @@ systemctl status dae
 
 ---
 
-# 3. 启动容器
+## 3. 启动容器
 
 创建网络。
 
@@ -56,7 +56,7 @@ nerdctl run -td --name test-1 --network bridge-1 --ip 10.0.1.100 rockylinux:9.3
 
 ---
 
-# 4. 配置dae
+## 4. 配置dae
 
 ```text
 # 全局配置
@@ -167,7 +167,7 @@ journalctl -u dae -f
 
 ---
 
-# 5. 测试
+## 5. 测试
 
 访问`ipinfo.io`可以看到公网IP已经改变。
 

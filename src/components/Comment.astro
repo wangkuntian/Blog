@@ -1,0 +1,84 @@
+---
+import "@waline/client/style";
+
+const { class: className } = Astro.props;
+---
+
+<comment-component>
+    <div id="waline" class={`not-prose ${className}`}>
+        Comment seems to stuck. Try to refresh?✨
+    </div>
+</comment-component>
+
+<script>
+    import { init as walineInit } from "@waline/client";
+    import type { WalineInstance } from "@waline/client";
+
+    let walineInstance: WalineInstance | null;
+
+    const walineConfig = {
+        server: "https://comment.littlemoon.vip",
+        emoji: ["weibo", "alus", "bilibili", "qq"],
+        additionalConfigs: {
+            locale: {
+                placeholder: "欢迎留言~~",
+            },
+        },
+    };
+
+    class Comment extends HTMLElement {
+        connectedCallback() {
+            if (!walineInstance) {
+                walineInstance = walineInit({
+                    el: "#waline",
+                    serverURL: walineConfig.server,
+                    reaction: [],
+                    dark: "html.dark",
+                    pageview: true,
+                    comment: true,
+                    ...walineConfig.additionalConfigs,
+                });
+            } else {
+                walineInstance.update();
+            }
+        }
+
+        disconnectedCallback() {
+            if (walineInstance) {
+                walineInstance.destroy?.();
+                walineInstance = null;
+            }
+        }
+    }
+
+    customElements.define("comment-component", Comment);
+</script>
+
+<style>
+    :global(.dark) #waline {
+        --waline-bg-color: var(--card-bg);
+        --waline-bg-color-light: var(--btn-plain-bg-hover);
+    }
+
+    :global(.wl-count) {
+        color: var(--waline-dark-grey);
+    }
+
+    :global(.wl-editor) {
+        padding: 0.35em 0.5em;
+        width: calc(100% - 2em);
+    }
+
+    :global(.wl-edit) {
+        color: var(--waline-dark-grey);
+    }
+
+    :global(#wl-edit)::placeholder {
+        color: var(--waline-dark-grey);
+    }
+
+    :global(.wl-panel) {
+        margin: 0.5em 0;
+        border: none;
+    }
+</style>
