@@ -53,3 +53,7 @@ kubectl -n kube-system get pod -o wide -l app=csi-nfs-node
 ```bash
 curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.12.1/deploy/uninstall-driver.sh | bash -s v4.12.1 --
 ```
+
+# 安装lvm-operator
+
+[官方仓库](https://github.com/openshift/lvm-operator)

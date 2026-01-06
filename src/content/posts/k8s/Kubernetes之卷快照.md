@@ -3,8 +3,8 @@ title: Kubernetes之卷快照
 published: 2025-12-15 17:41:28
 description: ''
 image: ''
-tags: []
-category: ''
+tags: ['Kubernetes']
+category: 'Kubernetes'
 draft: false
 lang: ''
 ---
